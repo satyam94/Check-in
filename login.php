@@ -1,36 +1,39 @@
 <?php
-	// Initialising Variables
-	$hostname="localhost";
-	$username="root";
-	$dbname="simple_login";
-	$password="root";
-
 	// Connecting to host
-	mysql_connect($hostname,$username,$password) or die("Cannot connect to mysql");
+	session_start();
+	if($_SESSION['login']=="true")
+	{
+		header('Location: loggedin.php');
+	}
 
-	//Selecting the database
-	mysql_select_db($dbname) or die("Cannot connect to database");
+	$_SESSION['username']=$_POST['username'];
+
+	require("common.php");
 
 	$login=mysql_query("SELECT * FROM login_info WHERE username = '" . $_POST['username'] . "'");
-
+	$row=mysql_fetch_array($login);
+	
 	//Checking if username exists
 	if(mysql_num_rows($login)==0)
 	{
+		$_SESSION['error']="Username Does Not Exist ";
 		header('Location: index.php');
 	}
 
-	$row=mysql_fetch_array($login);
-	
 	//Checking if password entered is correct
-	if($row['password']==$_POST['password'])
+	if($row['password']==$_POST['password'] && $_POST['password']!="")
 	{
-		// echo "Login Successful.<br>";
+		//To check that user is logged in or not
+		$_SESSION['login']="true";
+
 		header('Location: loggedin.php');
 	}
 	else
 	{
-		// echo " Login Unsuccesful.<br>";
+		if(!isset($_SESSION['error']))
+		{
+			$_SESSION['error']="Password Incorrect";
+		}
 		header('Location: index.php');
 	}
-	echo "This is the end";
 ?>
